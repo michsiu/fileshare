@@ -1,0 +1,695 @@
+<meta charset="utf-8" /*要养成加声明的习惯，不然保存为html打开后还是乱码*/> <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Photo Change to Right Side</title>
+    <style>
+
+        .grid-item .img-content {
+            width: 100%;
+            /* 图片宽度为父元素宽度的 100% */
+            height: auto;
+            /* 让高度自适应以保持宽高比 */
+            border-radius: 10px;
+            /* 设置圆角半径为10px */
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+            /* 底部投影 */
+
+            cursor: pointer;
+            /* 鼠标指针样式为手型 */
+        }
+
+
+
+        @keyframes fadeIn {
+            from {opacity: 0;} to {opacity: 1;}
+        }
+
+        @keyframes fadeOut {
+            from {opacity: 1;} to {opacity: 0;}
+        }
+
+        @keyframes zoomIn {
+            from {transform: scale(0.5);} to {transform: scale(1);}
+        }
+
+        @keyframes zoomOut {
+            from {transform: scale(1); opacity: 1;}
+            to {transform: scale(0.5) translateY(-300px); opacity: 0;}
+        }
+
+        .image-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(0, 0, 0, 0.7);
+            /* 半透明背景 */
+            z-index: 1000;
+            /* 确保覆盖在其他内容之上 */
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            
+        }
+
+        .image-overlay.active {
+            display: flex;
+        }
+
+        .image-overlay.fadeIn {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .image-overlay.fadeOut {
+            animation: fadeOut 0.5s ease forwards;
+        }
+
+        /* 应该是这个无意之中解决了infosvg查看信息后的缩放与滑动翻页的动画冲突，这样即使在查看信息的状态下滑动翻页依旧不会有动画冲突，原理未知 */
+        .image-overlay #overlayimage-container.active{
+            display:flex;
+            position:fixed;
+            max-height: 95vh;
+            max-width: 95vw;
+       height:auto;
+width:auto;
+background-color:red;
+            justify-content: center;
+            align-items: center;
+            transition:  transform 0.5s ease;
+        }
+
+        .image-overlay #overlayimage-container #overlay-infosvg {
+            width: 10%;
+            position: absolute;
+            top:10px;
+            left:10px;
+            cursor:pointer;
+            z-index: 1;            
+        }
+
+        .image-overlay #overlayimage-container #overlay-infosvg.fadeIn {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .image-overlay #overlayimage-container #overlay-infosvg.fadeOut {
+            animation: fadeOut 0.5s ease forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% {opacity: 1}
+            50%{opacity: 0}
+            100%{opacity: 1}
+        }
+        .image-overlay #overlayimage-container #overlay-infosvg.fadeInOut {
+            animation: fadeInOut 0.75s ease forwards;
+        }
+
+
+
+        .image-overlay #overlayimage-container #overlay-image {
+           max-height:95vh;
+           max-width: 100%;
+            border-radius: 10px;
+
+            transition: transform 0.5s ease;
+            /* transform: scale(1); */
+
+        }
+
+        .image-overlay #overlayimage-container #overlay-image.zoomOut {
+            animation: zoomOut 0.5s ease forwards;
+            /* 应用缩小效果 */
+        }
+        .image-overlay #overlayimage-container #overlay-image.zoomIn {
+            animation: zoomIn 0.5s ease forwards, fadeIn 0.3s ease forwards;
+        }
+
+
+        @keyframes nextPhotoChange {
+            0% {opacity: 1; transform: scale(1);}
+            50%{opacity: 0; transform: scale(0.3) translateY(-300px);}
+            100%{opacity: 1; transform: scale(1) translateY(0px);}
+        }
+
+        @keyframes prevPhotoChange {
+            0% {opacity: 1; transform: scale(1);}
+            50%{opacity: 0; transform: scale(0.3) translateY(300px);}
+            100%{opacity: 1; transform: scale(1) translateY(0px);}
+        }
+
+        .nextPhotoChange {
+            animation: nextPhotoChange 0.75s ease-in-out forwards;
+        }
+
+        .prevPhotoChange {
+            animation: prevPhotoChange 0.75s ease-in-out forwards;
+        }
+
+        
+
+        @keyframes colorChange {
+            0% { background-color: rgb(110, 114, 114,0.5); } /* 初始颜色 */
+            50% { background-color: rgba(184, 188, 188, 0.8);} /* 中间颜色 */
+            100% { background-color: rgb(110, 114, 114,0.5); } /* 回到初始颜色 */
+        }
+
+        .colorChange{
+                animation: colorChange 0.5s forwards;
+        }
+
+
+        #overlay-id{
+            position: absolute;
+            max-width: 80%;
+            bottom:30px;
+            z-index: 1;
+            cursor:pointer;
+
+            margin-top:10px;
+            margin-bottom:10px;
+            padding:10px;   
+
+            color:#fff; 
+            font-size:15px;
+            font-family:siyuanmid;
+
+            border-radius: 10px;        
+            border:1px solid rgba(198, 202, 202, 0.5);
+            background:rgb(110, 114, 114,0.5);
+
+            transition: 0.5s;
+            
+        }
+
+
+        #overlay-id.fadeIn{
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        #overlay-id.fadeOut{
+            animation: fadeOut 0.5s ease forwards;
+        }
+
+
+
+        
+
+/* overlay图标点击显示图片信息*/
+
+/* 显示图片信息文字部分处理 */
+#overlay-info {
+        padding: 10px;
+        margin-top:10px;
+        display: block;
+        position: absolute;
+        z-index: 2000;
+        top:72%;
+
+        max-width: 80%;
+        max-height: 35%;
+
+        color:#fff; 
+        font-size:15px;
+        font-family:siyuanmid;
+
+        border-radius: 10px;        
+        border: 1px solid #ccc;
+        -webkit-backdrop-filter: blur(10px);
+        background:rgb(110, 114, 114,0.5);
+
+        word-wrap: break-word;
+        overflow: auto;  
+  
+        transform:translateY(100px) scale(0);
+        opacity:0;
+        transition:  transform 0.5s ease, opacity 0.5s ease; 
+            
+}
+
+    .show-text#overlay-info {
+        opacity:1;
+        transform:translateY(0) scale(1);
+        transition:  transform 0.5s ease, opacity 0.5s ease;
+    }
+
+/* 显示图片信息图片部分处理 */
+
+    #overlayimage-container.show-text{
+        transform: translateY(-15%) scale(0.7);
+        transition:  transform 0.5s ease;
+    }
+
+
+    .grid-item #infosvg {
+        width: 10%;
+        position: absolute;
+        top:3px;
+        left:3px;
+        z-index: 1;
+        cursor:pointer;
+    }
+
+
+/* 单个图标点击显示图片信息 */
+    .info-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        -webkit-backdrop-filter: blur(10px);
+        background-color: rgba(0, 0, 0, 0.7);
+        /* 半透明背景 */
+        z-index: 2000;
+        /* 确保覆盖在其他内容之上 */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color:#fff; 
+        font-size:15px;
+        font-family:siyuanmid;
+        text-align: center;
+        padding: 10px;
+        
+        overflow: auto;
+        animation: fadeIn 0.5s ease forwards;
+
+    }
+
+    .info-overlay.active {
+        display: flex; 
+    }
+
+    .info-overlay.fadeOut {
+        animation: fadeOut 0.5s ease forwards;
+    }
+
+
+        
+
+
+    </style>
+</head>
+
+<body>
+    <div class="grid-container">
+        
+        
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240319/WJtwlFkjG4IC1710810091953.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">1CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240319/5jnLVf9iHQjO1710778170612.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">2CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240315/r3MEDeAEqN5g1710510184853.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">3CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240314/kNcSUJdsyV1q1710404721505.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">4CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240312/evYlvaWNvhOq1710181051995.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">5CRA-187ad53d5d410000</div>
+        </div>
+
+
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240306/u7kq0KkgIJ3B1709707264564.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">6CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240306/pTKssfjlfzbb1709691047144.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">7CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240305/uKoH0mt12j6R1709642053746.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">8CRA-187ad53d5d410000</div>
+        </div>
+
+        <div class="grid-item">
+            <img class="img-content"src="https://cdn.yunjie.art/yunjie-task-resource/20240302/zcbp5ePFqmj11709388905999.jpeg" alt="照片1">
+            <img id="infosvg" src="">
+            <div class="image-info" style="display: none;"></div>
+            <div class="image-id" style="display: none;">9CRA-187ad53d5d410000</div>
+        </div>
+
+
+        
+        
+    </div>
+
+    <div class="image-overlay" id="image-overlay">
+        <div id=overlayimage-container>
+        <img id="overlay-image">
+        <img id="overlay-infosvg" src="">
+
+        </div>
+        <div id="overlay-info"></div>
+
+        <div id='overlay-id'></div>
+
+        
+    </div>
+    <div class="info-overlay">
+
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/macy@2"></script>
+<script>
+    var macy = Macy({
+        container: '.grid-container',
+        trueOrder: false,
+        waitForImages: false,
+        margin: 5,
+        columns: 2
+    });
+
+    const images = document.querySelectorAll('.grid-item .img-content');
+    const imageIds = document.querySelectorAll('.image-id');
+    const imageInfos = document.querySelectorAll('.image-info');
+    const infosvgs = document.querySelectorAll('#infosvg');
+    
+
+
+    const overlay = document.getElementById('image-overlay');
+    const overlayImage = document.getElementById('overlay-image');
+    const overlayInfo = document.getElementById('overlay-info');
+    const overlayImageId = document.getElementById('overlay-id');
+    const overlayInfosvg = document.getElementById('overlay-infosvg');
+    const overlayImageContainer = document.getElementById('overlayimage-container');
+
+    const infoOverlay = document.querySelector('.info-overlay');
+
+    infosvgSrc = "data:image/jpeg;base64,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"
+    overlayInfosvg.src = infosvgSrc;
+
+    images.forEach(img => {
+        img.addEventListener('click', function () {
+            overlayImage.src = this.src;
+            overlayImage.alt = this.alt;
+            overlay.classList.add('active');
+            overlay.classList.add('fadeIn');
+            overlayImageContainer.classList.add('active');
+
+            // keyframe还是只能配合动画类的方式来使用，不然很容易动画冲突，且移除不会产生回滚效果，前提是最终的动画结果和元素初始状态一致
+            overlayImage.classList.add('zoomIn');
+            setTimeout(function() {
+                overlayImage.classList.remove('zoomIn');
+            }, 500); 
+
+            overlayImageId.classList.add('fadeIn');
+            setTimeout(function() {
+                overlayImageId.classList.remove('fadeIn');
+            }, 500); 
+
+            overlayInfosvg.classList.add('fadeIn');
+            setTimeout(function() {
+                overlayInfosvg.classList.remove('fadeIn');
+            }, 500); 
+
+            // 准备好image-overlay所需的id和info
+            overlayImageId.textContent = this.parentNode.querySelector('.image-id').textContent;
+            overlayInfo.textContent = this.parentNode.querySelector('.image-info').textContent;
+            console.log(overlayImageId.textContent+": "+overlayInfo.textContent)       
+        });
+    });
+
+
+
+    //每个infosvg添加监听事件，并获取对应的image-info内容
+    infosvgs.forEach(infosvg => {
+        infosvg.src = infosvgSrc;
+        infosvg.addEventListener('click', function () {
+            infoOverlay.classList.add('active');
+            infoOverlay.textContent = this.parentNode.querySelector('.image-info').textContent;  //准备好infoOverlay所需的info
+            console.log(infoOverlay.textContent)       
+        });
+    });
+
+    //infoOverlay退出
+    infoOverlay.addEventListener('click', function (event) {
+        if (event.target === this) {
+            infoOverlay.classList.add('fadeOut');
+            setTimeout(function() {
+            infoOverlay.classList.remove('fadeOut');
+            infoOverlay.classList.remove('active');
+            }, 500);
+            
+        }
+    });
+
+
+    //overlayInfo showText
+    overlayInfosvg.addEventListener('click', function () {
+        event.stopPropagation(); // 阻止事件冒泡到 overlay 元素，不然的话，就要放到img的监听事件里面才不会出现点击overlayinfosvg就导致整个overlay退出，overlayImage的监听事件同理
+        overlayImageContainer.classList.toggle('show-text');
+        overlayInfo.classList.toggle('show-text');
+        if (overlayImageContainer.classList.contains('show-text')) {
+        overlayImageId.classList.add('fadeOut')
+        } else {
+            overlayImageId.classList.remove('fadeOut')
+            overlayImageId.classList.add('fadeIn');
+            setTimeout(function() {
+                overlayImageId.classList.remove('fadeIn');
+            }, 500); 
+        }
+    });
+
+
+
+    overlay.addEventListener('click', closeOverlay);
+    // overlayImage.addEventListener('click', closeOverlay); //放外面，避免重复执行，但是需要使用事件冒泡才能实现放在img监听事件里面一样的效果，即点击该区域不会引发整个overlay的退出，所以，这里没必要添加了
+    // overlayImageId.addEventListener('click', closeOverlay);
+
+
+    let copiedItems = [];
+    overlayImageId.addEventListener('click',function(){
+        if (!copiedItems.includes(overlayImageId.textContent)) {
+            copiedItems.push(overlayImageId.textContent);
+            overlayImageId.classList.add('zoom');
+            console.log(copiedItems)
+            
+        }
+    });
+                        
+
+
+
+    function closeOverlay() {
+        // 如果应用了缩放动画，则添加延迟执行关闭动画，否则立即执行关闭动画
+        if (overlayImageContainer.classList.contains('show-text')) {
+            overlayImageContainer.classList.remove('show-text');
+            overlayInfo.classList.remove('show-text');
+            setTimeout(function() {
+                applyCloseAnimation();
+            }, 500); // 假设缩放动画持续 0.5 秒
+        } else {
+            applyCloseAnimation();
+        }
+    }
+    // 执行关闭动画
+    function applyCloseAnimation() {
+navigator.clipboard.writeText(copiedItems)
+
+        overlayImage.classList.add('zoomOut');
+        overlay.classList.add('fadeOut');
+
+        // 在关闭动画完成后重置类
+        setTimeout(function() {
+            overlayImage.classList.remove('zoomOut');
+            overlay.classList.remove('fadeOut');
+            overlay.classList.add('fadeIn');
+            overlay.classList.remove('active');
+            overlayImageId.classList.remove('fadeOut');
+            overlayImageContainer.classList.remove('active');
+        }, 600); // 假设动画持续 0.5 秒
+    }
+
+
+
+
+
+    //照片切换
+    overlayImage.addEventListener('touchmove', function(e) {
+        e.preventDefault(); // 阻止默认滚动行为
+        e.stopPropagation(); // 阻止事件冒泡
+            
+    }); //效果很好，就是会导致不跟手问题，有时候动画还没结束往下滑，但这时候屏幕就不会动
+
+        
+
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    overlayImage.addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+    });
+
+
+    overlayImage.addEventListener('touchend', function(e) {
+        touchEndY = e.changedTouches[0].clientY;
+        const deltaY = touchEndY - touchStartY;
+
+        if (deltaY > 50) {
+            slidePrevImage();
+            // 向下滑动，显示上一张图片
+            const prevImage = getPrevImage(overlayImage.src);
+            const prevId = getPrevId(overlayImageId.textContent);
+            const prevInfo = getPrevInfo(overlayInfo.textContent);
+            
+            if (prevImage) {
+                setTimeout(function() {
+                    overlayImage.src = prevImage.src;
+                    overlayImage.alt = prevImage.alt;
+                    overlayImageId.textContent = prevId.textContent
+                    overlayInfo.textContent = prevInfo.textContent
+                }, 250); //当前图片淡出后再切换图片
+                
+
+            }
+        } else if (deltaY < -50) {
+            slideNextImage();
+            // 向上滑动，显示下一张图片
+            const nextImage = getNextImage(overlayImage.src);
+            const nextId = getNextId(overlayImageId.textContent);
+            const nextInfo = getNextInfo(overlayInfo.textContent);
+            if (nextImage) {
+                
+                setTimeout(function() {
+                    overlayImage.src = nextImage.src;
+                    overlayImage.alt = nextImage.alt;
+                    overlayImageId.textContent = nextId.textContent
+                    overlayInfo.textContent = nextInfo.textContent
+                }, 250); //当前图片淡出后再切换图片
+            }
+        }
+        
+    });
+
+    function getPrevId(currentId) {
+        const currentIdIndex = Array.from(imageIds).findIndex(info => info.textContent === currentId);
+
+        if (currentIdIndex > 0) {
+            return imageIds[currentIdIndex - 1];
+        } else {
+            return null;
+        }
+    }
+
+    function getNextId(currentId) {
+        const currentIdIndex = Array.from(imageIds).findIndex(info => info.textContent === currentId);
+
+    if (currentIdIndex < imageIds.length - 1) {
+            return imageIds[currentIdIndex + 1];
+        } else {
+            return null;
+        }
+    }
+
+        function getPrevInfo(currentTxt) {
+        const currentInfoIndex = Array.from(imageInfos).findIndex(info => info.textContent === currentTxt);
+
+        if (currentInfoIndex > 0) {
+            return imageInfos[currentInfoIndex - 1];
+        } else {
+            return null;
+        }
+    }
+    
+    function getNextInfo(currentTxt) {
+        const currentInfoIndex = Array.from(imageInfos).findIndex(info => info.textContent === currentTxt);
+
+    if (currentInfoIndex < imageInfos.length - 1) {
+            return imageInfos[currentInfoIndex + 1];
+        } else {
+            return null;
+        }
+    }
+
+
+    function getPrevImage(currentSrc) {
+        const currentImageIndex = Array.from(images).findIndex(img => img.src === currentSrc);
+        if (currentImageIndex > 0) {
+            return images[currentImageIndex - 1];
+        } else {
+            return null;
+        }
+    }
+
+    function getNextImage(currentSrc) {
+        const currentImageIndex = Array.from(images).findIndex(img => img.src === currentSrc);
+        if (currentImageIndex < images.length - 1) {
+            return images[currentImageIndex + 1];
+        } else {
+            return null;
+        }
+    }
+
+    function slideNextImage(){
+        overlayImage.classList.add('nextPhotoChange'); 
+        overlayInfosvg.classList.add('fadeInOut');
+        overlayImageId.classList.add('colorChange');
+        overlayInfo.classList.add('colorChange'); 
+            setTimeout(function() {
+                overlayImage.classList.remove('nextPhotoChange');
+                overlayInfosvg.classList.remove('fadeInOut');
+                overlayImageId.classList.remove('colorChange');
+                overlayInfo.classList.remove('colorChange'); 
+            }, 750);
+    }
+
+    function slidePrevImage(){
+        overlayImage.classList.add('prevPhotoChange');  
+        overlayInfosvg.classList.add('fadeInOut');
+        overlayImageId.classList.add('colorChange');
+        overlayInfo.classList.add('colorChange'); 
+            setTimeout(function() {
+                overlayImage.classList.remove('prevPhotoChange');  
+                overlayInfosvg.classList.remove('fadeInOut');  
+                overlayImageId.classList.remove('colorChange'); 
+                overlayInfo.classList.remove('colorChange');    
+            }, 750);
+    }
+
+
+                
+
+
+</script>
+</body>
+
+</htm  
