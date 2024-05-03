@@ -1,0 +1,67 @@
+<body>
+    <strong><label>Proced Hex:</label></strong>
+    <span id="demo0"></span>
+
+    <br>
+    <br>
+
+    <strong><label>Correct Hex:</label></strong>
+    <span id="demo1"></span>
+
+    <br>
+    <br>
+
+    <strong><label></label>Proced BS64:</strong>
+    <span id="demo2"></span>
+
+    <br>
+    <br>
+
+    <strong><label>Correct BS64:</label></strong>
+    <span id="demo3"></span>
+
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script type="text/javascript">
+
+    const secret = 'DfNDhV3LYrVUmuGv5gaLUkdjjATgu1SLV9HNHHRWGyaN';
+
+    const message = "PUT\n\nimage/png\nMon, 29 Apr 2024 14:56:59 GMT\nx-oss-copy-source:/liblibai-online/sd-gen-save-img%2F122597581-355ca98e0d774893d758b484f317a1b16d67b36c4af45be662ca4bf58880d020.png\nx-oss-date:Mon, 29 Apr 2024 14:56:59 GMT\nx-oss-security-token:CAISmAx1q6Ft5B2yfSjIr5fbeOPQt+d4gorfShWEjVAXPd14uIGTujz2IHtPenltBewbvvUznGxZ6vwblq9oR9paSEacjEepUg4Oo22beIPkl5GfH95m4cTX1QHxZjf/2MjNGbubKPrWZvaqbX3diyZ32sGUXD6+XlujQ+vr7Jl8dYY4UxWfZzhLD8s0Qwx5s50iKGf2P/SgOQKQiQi2NkdzvRdmgm5S8Lm2xtbmiiDTl1rn0OQY1auTD5GvdJtrJ4wtEYX3juh3fK7A2idRrgRP7OJ3iaVL9HDGu97aDggPskXdb7aLrNdicFIhNqE2FvdP/afwm6V047eKnNmwiWSsVIM4eiDbQ5/anqmgMei1N9E/WK/mMnDWqL6mPYX0tAVWFxB+MxhRKfUsNlh6CxEnVlO/LbS8qmjXfiCpSaWOzNsWs/xPwk7v4MCBKnWWXrydylx4AJInaF4yPBNkmQ6je6QdIQtXaAElVfTHSYR5aBFUoKKtoQjKEyxlx35a+ObyIvLTs68ScsK9LGUss+c0YJBBrBF0LTDeQK6vjUE5bXFsRa0svoDmJZ647s3zooCUevWUJf0bnV9YfDvNzU+KUmgCFTDtwdchZFGEgXG4rsr2/ohnDREl6/1GEAiBaqwNlVF95Lao5BnhWIaBH3mh5Tg/4cKKvdsNu09ldPOlieaT+yLbpDmRZKA2lYDcX3V+BlbVNnVy26KVnWlV5UJDwWW1MRIe4V2QkHq1ZIga1/WEyzRYBaBX3qa6Hz6r5TdnEsnboeRJC+djduRPWP+9mB1s3rjmqhS/tsrKtg90IPLzcL9heYNNBAz+167kZtIZg+h/CTO5O8wGo4BFlR6MxGZpjYdec9UxA0tSDYdgfbKM5I+yvpgC2rRXlc+PMaizTL/58cP4XnXmbCYlnNBNxgRqcn+0v4W2MgrEZqkshhyQsXxvaWGPjMiolWYuaZajCtpD5sMqcFCGi30Pc9dKPMxbpM2gIMxqOikTNZRyUiXJBORg0/VJKDcAvMVzKL/MTTDe7weGSk1WMcdWkaOVbtFK+Dj2kbY9toS1D52+g0PO67n1/f1Jt3VBb9uBp4uSbwTzKylPWHNQy8DZGJpG3rgpuCAqTZnhM9vT2tr5/99LTR2g1U2seM+rh2LrWTfddzWWEVAIj3g75MhXwOFnXlFmcGtWFcCwDNAQ1iaGhjftKSyqKUHGXCf6ewZZn6E1iC7c4zaWyeYzU3o1NFEiCtf908OisJ7fjYDXMmv0SrrYrOUtK5HBSNsfxIv+RvNOwIlekYETQRBeamjhkaUiXJPKTtULBwaTRDHvjL3a0rCvyVHmJPh4tlN9843vF6rdxy6EaopSIqeW0yFY1R7MO5vCg99zow9sRAvC7bweieUKAGJrjnuwjqGE7nNATP7Tw1mZe4E9X96Tk7/0k0wSjCJJ4Zv11XOOoM1tcIkaztEXIigPgKkZBeQxyZ2PZ6KGmYqPcXiXWe8+5QAicXdyF4e4EdOM2RLFjZgn+N6QzbgbTDqfrbbzxBbTVAbcj+HZ6YIWheujLTsSCAXWjgYHyo9ngljNYx8wSmzyGqCA8k/lQi0Fc1LSV6nCw7wEAmSnZ4UE8DDUFpcdlDhCb5lX4ZdhUPiPLPIt7jX/0Jb4Ch/g7ocRhc7cPZv+OYhkgYozMqkycQOypc/oMLPE6J8iFhMjAeBxeMLKH79YaBUXftrakkviu3ISklggrkoxe6vFc8Sukc7AcKEi4jElGjJOqCUiU1fTGNSNsDOVy331L4Hm0q5pSteZHLfd0P4Em8hX38ZQohrlgLzSmzaurXo/+5a0AyCl0Qs3tP//2uXKFOpytmqcuII/quq1fhnRMxh+YF+R+DqqHH8rpcqRWF0mlIkfl1e9wYMS3Uu4qPGAAYa/1Fq/RMz4rjXHQWqkhdrhE1bPF3CIfd06ECCYq67QBvX8iaoVJw6C8jkYhRo+BErbHe2AgiIzU/0rw7aPpEeRor+/R35nn9I0DUQ3Vy1w1RwbOU063C4h8NHwIfDndWdNEyNT1gk6yzb2zGQa6M/7+UUI377k1qMRMvcuYGZO4qPqxTDgesc1l90agAGGLRglYbI0i9ETR2oQ1FCJnQ9uphTBTe+iu+ArRviWSgOlrWSicHjHxbM2meBPmfqVGtzfxj6yhNM0wTJT63dbSdX/x4tqyqBLgMBn8pnLya9seIhMjZ0B0gFNdI30zF11/t3RRrZbdztRi+oiZmAA7n0ppl2No8r4EMKEEOQ+CSAA\nx-oss-user-agent:aliyun-sdk-js/6.17.1 Chrome 124.0.0.0 on Windows 10 64-bit\n/liblibai-online/img/e969834476be4508ade1c97df0d131c5/fbfa66f2-a836-410d-9bef-db0284ea327f.png";
+   
+    // var message = "Hello, world!";
+    // var secret = "cryptography"; 
+
+    var hmac = CryptoJS.HmacSHA1(message,secret);  // hmac 对象现在包含了 HMAC 的结果,可以写，但不能打印出来
+
+    
+    console.log(hmac.toString(CryptoJS.enc.Hex)) //转换为可打印对象也就是说最后得到的结果是个16进制的代码
+
+
+    var hmacBase64 = hmac.toString(CryptoJS.enc.Base64); // string: 'a9qiD+INcP3rAAIEJVJORg3eMW0='
+    // 就是得不到想要的结果，不知道为什么；按理来说都是SHA1算法，不应该出现这样的问题
+    console.log(hmacBase64);
+
+    // document.write(hmacBase64);
+
+       
+    // 疑似最终hmac对应的的Hex,十六进制结果验证
+    var correctHex = "6bdaa20fe20d70fdeb00020425524e460dde316d" 
+    var correctHmacWordArray = CryptoJS.enc.Hex.parse(correctHex);
+    var correctHmacBase64 = correctHmacWordArray.toString(CryptoJS.enc.Base64);
+    console.log(correctHmacBase64)
+
+    document.getElementById("demo0").innerHTML = hmac.toString(CryptoJS.enc.Hex);
+    document.getElementById("demo1").innerHTML = correctHex;
+    document.getElementById("demo2").innerHTML = hmacBase64;
+    document.getElementById("demo3").innerHTML = correctHmacBase64;
+        
+
+
+
+
+
+</script>
